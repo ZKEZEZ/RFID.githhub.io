@@ -70,6 +70,74 @@
                 });
             }
         });
+
+        @app.route('/scan', methods=['POST'])
+def scan_card():
+    try:
+        print("Received scan request") # Debug log
+        
+        if not request.is_json:
+            print("Request is not JSON") # Debug log
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid request format'
+            })
+        
+        rfid_id = request.json.get('rfid_id')
+        print(f"RFID ID: {rfid_id}") # Debug log
+        
+        if not rfid_id:
+            return jsonify({
+                'status': 'error',
+                'message': 'กรุณาสแกนบัตร'
+            })
+
+        student = get_student_by_rfid(rfid_id)
+        print(f"Student data: {student}") # Debug log
+        
+        if not student:
+            return jsonify({
+                'status': 'error',
+                'message': 'ไม่พบข้อมูลบัตรในระบบ'
+            })
+
+        current_time = datetime.datetime.now()
+        thai_year = current_time.year + 543
+        formatted_time = current_time.strftime(f'%d ธันวาคม {thai_year} %H:%M:%S')
+
+        message = (
+            f'\nระบบสแกนบัตร PCSHSL: เช็คการสแกนบัตร\n'
+            f'{student[2]}\n'
+            f'ออกจากหอพักเข้าโรงเรียน : {formatted_time}\n'
+            f'สถานะ : ออกจากหอพักไปโรงเรียน'
+        )
+
+        print(f"Sending Line notification") # Debug log
+        line_sent = send_line_notification(message)
+        print(f"Line notification sent: {line_sent}") # Debug log
+        
+        print(f"Logging scan") # Debug log
+        log_success = log_scan(rfid_id, 'ออกจากหอพัก', 'ไปโรงเรียน')
+        print(f"Scan logged: {log_success}") # Debug log
+
+        response_data = {
+            'status': 'success' if line_sent else 'warning',
+            'message': 'บันทึกการสแกนเรียบร้อย' if line_sent else 'บันทึกการสแกนแล้ว แต่ไม่สามารถส่งไลน์ได้',
+            'student': student[2],
+            'timestamp': formatted_time
+        }
+        print(f"Sending response: {response_data}") # Debug log
+        
+        return jsonify(response_data)
+
+    except Exception as e:
+        print(f"Error in scan_card: {str(e)}") # Debug log
+        import traceback
+        traceback.print_exc() # Print full error traceback
+        return jsonify({
+            'status': 'error',
+            'message': 'เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่อีกครั้ง'
+        })
     </script>
 </body>
 </html>
