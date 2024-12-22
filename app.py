@@ -8,7 +8,7 @@ app = Flask(__name__)
 db_lock = Lock()
 
 # Line Notify configuration
-LINE_NOTIFY_TOKEN = 'YOUR_LINE_NOTIFY_TOKEN'
+LINE_NOTIFY_TOKEN = 'Kzibk3dddtNx8U5fMGUeU506a1HrfuCk0u2O75NZj3s'
 LINE_NOTIFY_API = 'https://notify-api.line.me/api/notify'
 
 def init_db():
