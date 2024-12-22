@@ -28,7 +28,7 @@ def init_db():
                 rfid_id TEXT,
                 timestamp DATETIME,
                 action TEXT,
-                status TEXT
+                status TEXTW
             )
         ''')
 
